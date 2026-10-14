@@ -392,6 +392,237 @@ def test_all_examples_import_and_run_headless():
         assert r.returncode == 0, f"{script} failed: {r.stderr.decode('utf-8', 'replace')[-800:]}"
 
 
+# --------------------------------------------------------------------------
+# generated library
+# --------------------------------------------------------------------------
+
+def test_derived_library_is_present_and_sized():
+    names = sp.derived_names()
+    assert len(names) >= 150, len(names)
+    assert len(set(names)) == len(names), "duplicate derived ids"
+
+
+def test_every_derived_palette_is_well_formed():
+    for pid in sp.derived_names():
+        cols = sp.palette(pid)
+        # diverging ramps have 2*n_steps+1 members with the centre in the middle
+        expected = 7 if pid.startswith("div-") else 8
+        assert len(cols) == expected, f"{pid}: {len(cols)} != {expected}"
+        assert len(set(cols)) == len(cols), f"{pid} has duplicate colours"
+        for c in cols:
+            sp.hex_to_rgb(c)
+
+
+def test_diverging_centre_is_pale_and_centred():
+    for pid in sp.derived_names():
+        if not pid.startswith("div-"):
+            continue
+        cols = sp.palette(pid)
+        centre = len(cols) // 2
+        lums = [sp.luminance(c) for c in cols]
+        # the middle member is the palest, and both arms darken away from it
+        assert lums[centre] == max(lums), pid
+        assert all(lums[i] <= lums[i + 1] + 0.02 for i in range(centre)), pid
+        assert all(lums[i] >= lums[i + 1] - 0.02
+                   for i in range(centre, len(cols) - 1)), pid
+
+
+def test_derived_palettes_clear_the_quality_gate():
+    """The gate the generator enforces: separation and a real lightness ramp."""
+    for pid in sp.derived_names():
+        m = sp.applications(pid)["metrics"]
+        gate = 3.5 if m["is_scale"] else 6.0
+        assert m["min8"] >= gate, f"{pid}: min deltaE {m['min8']} < {gate}"
+        assert m["span8"] >= 0.18, f"{pid}: lightness span {m['span8']}"
+
+
+def test_derived_ids_encode_their_transform():
+    assert sp.palette("glacier-h030") != sp.palette("glacier")
+    assert sp.palette("glacier-h000") == sp.palette("glacier")
+    assert sp.resolve("glacier-h030").endswith("h030")
+
+
+def test_alias_resolution_covers_derived():
+    assert sp.resolve("glacier-warm") == "glacier-warm"
+    assert sp.resolve("GLACIER-WARM") == "glacier-warm"
+    assert sp.palette("sage-mono") == sp.palette("sage-mono".upper())
+
+
+def test_derived_palettes_work_in_the_matplotlib_layer():
+    if not _has_mpl():
+        return
+    import matplotlib
+    matplotlib.use("Agg")
+    cm = sp.colormap("burgundy-clin-hi")
+    assert cm.name == "sci_burgundy-clin-hi"
+    assert "sci_burgundy-clin-hi" in matplotlib.colormaps
+    sp.set_theme("sage-mono", n=4)
+    cycle = [c.upper() for c in matplotlib.rcParams["axes.prop_cycle"].by_key()["color"]]
+    assert len(cycle) == 4
+    assert set(cycle) <= {c.upper() for c in sp.palette("sage-mono")}
+    sp.set_theme("glacier")
+
+
+def test_family_and_index():
+    for fam in sp.families():
+        ids = sp.family(fam)
+        assert ids, fam
+        for pid in ids:
+            assert sp.get(pid)["family"] == fam
+    # a published palette id works as a "family" too
+    assert len(sp.family("glacier")) > 1
+    assert all(sp.get(p)["base"] == "glacier" for p in sp.family("glacier"))
+
+
+def test_family_min_score_filters():
+    all_ids = sp.family("hue_rotate")
+    high = sp.family("hue_rotate", min_score=60)
+    assert len(high) < len(all_ids)
+    assert all(sp.get(p)["score"] >= 60 for p in high)
+
+
+def test_search_finds_the_exact_colour():
+    hits = sp.search("#315C6B", limit=8)
+    assert hits
+    exact = [h for h in hits if h["delta_e"] == 0.0]
+    assert exact, "no exact match in the results"
+    assert exact[0]["closest"] == "#315C6B"
+    # centrality is a tie-breaker, not an override: matching the emphasis colour
+    # of another palette is a legitimate near-miss and may rank above an exact
+    # match that only occurs as a pale background member
+    assert any(h["id"] == "glacier" for h in hits)
+
+
+def test_search_returns_positions_within_range():
+    for h in sp.search("#7A4E7E", limit=6):
+        assert 1 <= h["position"] <= 8
+        assert h["delta_e"] <= 26.0
+
+
+def test_stats_adds_up():
+    s = sp.stats()
+    assert s["published"] == len(sp.names())
+    assert s["derived"] == len(sp.derived_names())
+    assert s["total"] == s["published"] + s["derived"]
+    assert sum(s["families"].values()) == s["derived"]
+    assert set(s["families"]) == set(sp.families())
+
+
+def test_random_palette_is_reproducible():
+    a = sp.random_palette(seed=7)
+    b = sp.random_palette(seed=7)
+    assert a == b
+    assert a in set(sp.derived_names())
+
+
+# --------------------------------------------------------------------------
+# application profiles
+# --------------------------------------------------------------------------
+
+def test_profiles_exist_with_criteria():
+    profs = sp.profiles()
+    assert set(profs) == {"clinical", "database", "basic", "general"}
+    for name, p in profs.items():
+        assert p["label_zh"] and p["label_en"], name
+        assert p["criteria"], name
+        for metric, t in p["criteria"].items():
+            assert len(t) == 3, f"{name}.{metric}"
+            lo, hi, weight = t
+            assert lo < hi, f"{name}.{metric}: floor must be below ceiling"
+
+
+def test_applications_cover_every_palette():
+    for pid in list(sp.names()) + sp.derived_names():
+        a = sp.applications(pid)
+        assert set(a["scores"]) == {"clinical", "database", "basic", "general"}
+        assert set(a["fit"]) == {"clinical", "database", "basic", "general"}
+        for v in a["scores"].values():
+            assert 0 <= v <= 100, (pid, v)
+        assert a["primary"] in a["scores"]
+        assert a["metrics"]["n"] in (7, 8), (pid, a["metrics"]["n"])
+
+
+def test_derived_palettes_are_all_classified_somewhere():
+    """Scores and fit flags exist for every palette.
+
+    Two groups are expected to fit nothing: diverging ramps (excluded from
+    categorical fits by design, since they are colour bars) and the low-span
+    ramps, which must score below the general profile's floor rather than being
+    silently unclassified.
+    """
+    prof = sp.profiles()["general"]
+    for pid in sp.derived_names():
+        a = sp.applications(pid)
+        assert set(a["scores"]) == {"clinical", "database", "basic", "general"}
+        if a["metrics"]["is_scale"]:
+            assert not any(a["fit"].values()), pid
+            continue
+        if not any(a["fit"].values()):
+            assert a["scores"]["general"] < prof["score_gate"], pid
+
+
+def test_suggest_for_ranks_by_score():
+    for field in ("clinical", "database", "basic", "general", "临床", "数据库", "基础"):
+        rows = sp.suggest_for(field, n=8)
+        assert rows, field
+        scores = [r["score"] for r in rows]
+        assert scores == sorted(scores, reverse=True), field
+        for r in rows:
+            assert r["id"] in set(sp.names()) | set(sp.derived_names())
+            assert isinstance(r["fits"], bool)
+            assert r["why"]
+
+
+def test_suggest_for_require_fit_only_returns_fits():
+    for field in ("clinical", "database", "basic"):
+        for r in sp.suggest_for(field, n=20, require_fit=True):
+            assert r["fits"] is True, (field, r["id"])
+
+
+def test_suggest_for_rejects_unknown_field():
+    try:
+        sp.suggest_for("astrology")
+    except KeyError as exc:
+        assert "unknown field" in str(exc)
+    else:
+        raise AssertionError("expected KeyError")
+
+
+def test_clinical_gates_are_actually_met_by_fitting_palettes():
+    """A palette marked as fitting clinical work must clear the documented gates.
+
+    The gates are read from profiles() rather than duplicated here, so the test
+    cannot drift from the generator's criteria.
+    """
+    gates = sp.profiles()["clinical"]["gate"]
+    checked = 0
+    for pid in sp.derived_names():
+        a = sp.applications(pid)
+        if not a["fit"]["clinical"]:
+            continue
+        m = a["metrics"]
+        for metric, need in gates.items():
+            assert m[metric] >= need, f"{pid}: {metric} {m[metric]} < {need}"
+        checked += 1
+    assert checked > 0, "no palette fits clinical work"
+
+
+def test_diverging_palettes_are_excluded_from_categorical_fits():
+    for pid in sp.derived_names():
+        if not pid.startswith("div-"):
+            continue
+        a = sp.applications(pid)
+        assert not any(a["fit"].values()), pid
+        assert a["metrics"]["is_scale"] is True
+        assert a["metrics"]["arm_monotone"] is True, pid
+
+
+def test_field_fits_are_not_empty():
+    s = sp.stats()
+    for field in ("clinical", "database", "basic", "general"):
+        assert s["fit_by_field"][field] > 0, field
+
+
 if __name__ == "__main__":
     failures = 0
     for name, fn in sorted(globals().items()):

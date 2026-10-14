@@ -3,11 +3,13 @@
 
 Commands
 --------
-list                          show every palette with swatches
-show <palette>                detail one palette (ramp, roles, audit)
+list                          the six published palettes with swatches
+show <palette>                detail any palette (published or generated)
 check [palette ...]           colour-vision / contrast audit
 export <palette> <file>       write .json .css .scss .ase .gpl .jasc
 sheet <file.png>              render a swatch sheet for the README
+suggest <field>               rank palettes for clinical / database / basic work
+search <#hex>                 find palettes containing a colour
 """
 
 from __future__ import annotations
@@ -15,7 +17,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from .core import check, palette, report, resolve
+from .core import check, lookup, palette, report, resolve
 from .data import PALETTES, PALETTE_ORDER
 from .exporters import export, preview, swatches
 
@@ -23,23 +25,68 @@ from .exporters import export, preview, swatches
 def _cmd_list(args) -> int:
     print(preview(args.palettes or None, per_line=args.per_line))
     print("\nids: " + ", ".join(PALETTE_ORDER))
+    print(f"plus {len(_derived_names())} generated variants "
+          f"(e.g. glacier-h030, burgundy-clin-hi, sage-mono)")
     print("Chinese names also work, e.g. sci_palettes show 冰川蓝绿")
     return 0
 
 
+def _derived_names() -> list[str]:
+    from . import derived
+    return derived.derived_names()
+
+
 def _cmd_show(args) -> int:
     pid = resolve(args.palette)
-    info = PALETTES[pid]
+    info = lookup(pid)
     print(f"{info['name_zh']}  ·  {info['name_en']}   [{pid}]")
-    print(f"  {info['subtitle_zh']}  /  {info['subtitle_en']}")
-    print(f"  mood: {info['vibe']}")
+    print(f"  {info['subtitle_zh']}")
     print()
     print(swatches(info["hex"]))
-    print()
-    for c, r in zip(info["hex"], info["roles"]):
-        print(f"  {c}   {r}")
+    if pid in PALETTES:
+        print()
+        for c, r in zip(info["hex"], info["roles"]):
+            print(f"  {c}   {r}")
     print()
     print(report(pid))
+    from . import derived
+    if pid not in PALETTES:
+        a = derived.applications(pid)
+        print("scores       " + ", ".join(f"{k} {v}" for k, v in a["scores"].items()))
+        print("fits         " + ", ".join(k for k, v in a["fit"].items() if v) or "none")
+    return 0
+
+
+def _cmd_suggest(args) -> int:
+    from . import derived
+    rows = derived.suggest_for(args.field, n=args.number,
+                               require_fit=args.require_fit)
+    if not rows:
+        print(f"no palette clears the gates for {args.field!r}",
+              file=sys.stderr)
+        return 2
+    print(f"{args.field}: {len(rows)} palettes"
+          + (" (all clear the field's hard gates)" if args.require_fit else ""))
+    print()
+    for r in rows:
+        print(f"  {r['score']:>3}  {r['id']:<24} {'fit' if r['fits'] else '   '}  "
+              f"{r['name_zh']}")
+        print(f"       {swatches(r['hex'])}")
+        print(f"       {r['why']}")
+    return 0
+
+
+def _cmd_search(args) -> int:
+    from . import derived
+    rows = derived.search(args.colour, limit=args.number)
+    if not rows:
+        print(f"no palette contains a colour within tolerance of {args.colour!r}",
+              file=sys.stderr)
+        return 2
+    for r in rows:
+        print(f"  {r['id']:<24} closest {r['closest']} (dE {r['delta_e']}, "
+              f"position {r['position']})  score {r['score']}")
+        print(f"       {swatches(r['hex'])}")
     return 0
 
 
@@ -80,16 +127,18 @@ def _cmd_sheet(args) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="sci_palettes",
-                                description="六套科研配色 / six scientific colour schemes")
+    p = argparse.ArgumentParser(
+        prog="sci_palettes",
+        description="科研配色 / scientific colour schemes "
+                    "(6 published palettes + 178 generated variants)")
     sub = p.add_subparsers(dest="command")
 
-    s = sub.add_parser("list", help="show every palette with swatches")
+    s = sub.add_parser("list", help="show the published palettes with swatches")
     s.add_argument("palettes", nargs="*")
     s.add_argument("--per-line", type=int, default=8)
     s.set_defaults(func=_cmd_list)
 
-    s = sub.add_parser("show", help="detail one palette")
+    s = sub.add_parser("show", help="detail one palette, published or generated")
     s.add_argument("palette")
     s.set_defaults(func=_cmd_show)
 
@@ -99,7 +148,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.set_defaults(func=_cmd_check)
 
     s = sub.add_parser("export", help="write palette files")
-    s.add_argument("palette", nargs="?", default=None)
+    s.add_argument("palette", nargs="?", default=None,
+                   help="a palette id, or 'all' for every palette")
     s.add_argument("path")
     s.set_defaults(func=_cmd_export)
 
@@ -108,6 +158,20 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("palettes", nargs="*")
     s.add_argument("--dpi", type=int, default=300)
     s.set_defaults(func=_cmd_sheet)
+
+    s = sub.add_parser("suggest", help="rank palettes for a research field")
+    s.add_argument("field",
+                   help="clinical / database / basic / general "
+                        "(中文也行: 临床 / 数据库 / 基础 / 通用)")
+    s.add_argument("-n", "--number", type=int, default=8)
+    s.add_argument("--require-fit", action="store_true",
+                   help="only palettes that clear every hard gate for the field")
+    s.set_defaults(func=_cmd_suggest)
+
+    s = sub.add_parser("search", help="find palettes containing a colour")
+    s.add_argument("colour", help="a hex colour, e.g. #315C6B")
+    s.add_argument("-n", "--number", type=int, default=6)
+    s.set_defaults(func=_cmd_search)
     return p
 
 

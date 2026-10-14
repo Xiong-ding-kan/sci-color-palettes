@@ -7,16 +7,43 @@ import json
 import os
 from datetime import datetime, timezone
 
-from .core import as_hex, as_rgb, palette, resolve
+from .core import as_hex, as_rgb, lookup, palette, resolve
 from .data import PALETTES, PALETTE_ORDER
 
 __all__ = [
     "swatches", "preview", "to_json", "to_css", "to_scss", "to_gpl",
-    "to_jasc", "to_ase", "export",
+    "to_jasc", "to_ase", "export", "resolve_names",
 ]
 
 # 24-bit ANSI block; falls back to the hex text when colour is unsupported.
 _BLOCK = "\u2588\u2588\u2588"
+
+
+def resolve_names(names=None) -> list[str]:
+    """Normalise an export target list.
+
+    ``None`` (default) means the six published palettes, so exports stay small;
+    pass ``"all"`` or ``"derived"`` to include the generated variants.
+    """
+    if names is None:
+        return list(PALETTE_ORDER)
+    if isinstance(names, str):
+        if names in ("all", "everything"):
+            from . import derived
+            return list(PALETTE_ORDER) + derived.derived_names()
+        if names == "derived":
+            from . import derived
+            return derived.derived_names()
+        return [resolve(names)]
+    return [resolve(n) for n in names]
+
+
+def _export_record(pid: str) -> dict:
+    """Public metadata only: internal audit scores stay out of export files."""
+    info = dict(lookup(pid))
+    for k in ("audit", "score", "transform", "family", "base"):
+        info.pop(k, None)
+    return info
 
 
 def swatches(colours, per_line: int = 8) -> str:
@@ -32,13 +59,13 @@ def swatches(colours, per_line: int = 8) -> str:
 
 def preview(names=None, per_line: int = 8) -> str:
     """Terminal report for one or more palettes."""
-    ids = [resolve(n) for n in names] if names else list(PALETTE_ORDER)
+    ids = resolve_names(names)
     blocks = []
     for pid in ids:
-        info = PALETTES[pid]
+        info = lookup(pid)
         blocks.append(
             f"{info['name_zh']}  ·  {info['name_en']}   [{pid}]\n"
-            f"  {info['subtitle_zh']}  /  {info['subtitle_en']}\n"
+            f"  {info['subtitle_zh']}\n"
             f"{swatches(info['hex'], per_line)}"
         )
     return "\n\n".join(blocks)

@@ -13,12 +13,12 @@ import re
 from .data import ALIASES, PALETTE_ORDER, PALETTES
 
 __all__ = [
-    "resolve", "names", "palette", "as_hex", "as_rgb", "as_rgb01", "as_hsl",
-    "luminance", "contrast_ratio", "wcag_level", "delta_e", "nearest",
-    "sort_by_luminance", "lighten", "darken", "mix", "sub", "select",
-    "ramp", "to_colormap_stops", "check", "report", "hex_to_rgb", "rgb_to_hex",
-    "PROTANOPIA", "DEUTERANOPIA", "TRITANOPIA", "ACHROMATOPSIA",
-    "simulate_cvd", "cvd_matrix",
+    "resolve", "info", "lookup", "names", "palette", "as_hex", "as_rgb",
+    "as_rgb01", "as_hsl", "luminance", "contrast_ratio", "wcag_level",
+    "delta_e", "nearest", "sort_by_luminance", "lighten", "darken", "mix",
+    "sub", "select", "ramp", "to_colormap_stops", "check", "report",
+    "hex_to_rgb", "rgb_to_hex", "PROTANOPIA", "DEUTERANOPIA", "TRITANOPIA",
+    "ACHROMATOPSIA", "simulate_cvd", "cvd_matrix",
 ]
 
 _HEX_RE = re.compile(r"^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$")
@@ -50,7 +50,11 @@ def names() -> list[str]:
 
 
 def resolve(name: str) -> str:
-    """Map any alias (Chinese name, English name, shorthand) to a canonical id."""
+    """Map any alias (Chinese name, English name, shorthand, derived id) to an id.
+
+    Published palettes are checked first; the generated variants are consulted
+    only if nothing matches, so this stays fast for the common case.
+    """
     if not isinstance(name, str):
         raise TypeError("palette name must be a string")
     key = name.strip()
@@ -59,15 +63,45 @@ def resolve(name: str) -> str:
     hit = ALIASES.get(key) or ALIASES.get(key.lower())
     if hit:
         return hit
+    # generated variants (hue rotations, temperature drift, blends, ...)
+    try:
+        from . import derived
+        avail = derived._by_id()
+        if key in avail:
+            return key
+        low = {k.lower(): k for k in avail}
+        if key.lower() in low:
+            return low[key.lower()]
+    except (ImportError, FileNotFoundError, KeyError):
+        pass
     raise KeyError(
-        f"unknown palette {name!r}; available: {', '.join(PALETTE_ORDER)} "
-        f"(aliases include the Chinese names, e.g. '冰川蓝绿')"
+        f"unknown palette {name!r}; {len(PALETTES)} published palettes: "
+        f"{', '.join(PALETTE_ORDER)} "
+        f"(aliases include the Chinese names, e.g. '冰川蓝绿'); "
+        f"plus generated variants such as 'glacier-h030' or 'glacier-warm' "
+        f"- list them with sci_palettes.derived_names()"
     )
+
+
+def info(name: str) -> dict:
+    """Metadata for any palette, published or generated."""
+    from . import derived
+    return derived.get(name)
+
+
+def lookup(name: str) -> dict:
+    """Registry record for any palette: the one accessor the rest of the
+    package uses, so published and generated palettes behave identically."""
+    pid = resolve(name)
+    if pid in PALETTES:
+        return PALETTES[pid]
+    from . import derived
+    return derived.all_palettes()[pid]
 
 
 def palette(name: str, key: str = "hex") -> list:
     """Colours of one palette as a list of hex strings (or 'rgb'/'roles')."""
-    p = PALETTES[resolve(name)]
+    p = lookup(name)
     if key == "roles":
         return list(p["roles"])
     if key == "rgb":
@@ -387,7 +421,7 @@ def check(name: str, min_delta_e: float = 12.0) -> dict:
             "(marker shape, linestyle, direct label)")
     return {
         "palette": resolve(name),
-        "name_zh": PALETTES[resolve(name)]["name_zh"],
+        "name_zh": lookup(name)["name_zh"],
         "n": len(cols),
         "hard_pairs": pairs,
         "cvd": cvd,

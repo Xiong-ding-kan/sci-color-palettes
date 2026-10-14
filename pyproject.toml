@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sci-palettes"
-version = "1.0.0"
-description = "Six publication-ready scientific colour schemes for SCI figures (matplotlib, seaborn, CSS, Adobe ASE)."
+version = "2.0.0"
+description = "184 publication-ready colour schemes for SCI figures - 6 published palettes plus 178 audited variants, scored for basic research, clinical research and database/registry work."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
@@ -31,3 +31,9 @@ Homepage = "https://github.com/Xiong-ding-kan/sci-color-palettes"
 [tool.setuptools]
 package-dir = { "" = "scripts" }
 packages = ["sci_palettes"]
+# the generated palette library and the field scores are data files the package
+# loads at runtime; without this they are missing from an installed wheel
+include-package-data = true
+
+[tool.setuptools.package-data]
+sci_palettes = ["derived.json", "applications.json"]

@@ -23,22 +23,40 @@ from .core import (  # noqa: F401
 from .data import ALIASES, PALETTES, PALETTE_ORDER  # noqa: F401
 from .exporters import export, preview, swatches, to_ase, to_css, to_gpl, to_jasc, to_json, to_scss  # noqa: F401
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 
-# matplotlib helpers are re-exported lazily so importing the package in a
-# non-plotting environment never requires matplotlib.
+# The generated palette library and the application profiles are big data files
+# (~90 KB JSON each). They are loaded on first use only, so `import
+# sci_palettes` stays instant for scripts that just need the six palettes.
+_LAZY_NAMES = {
+    # matplotlib helpers (matplotlib itself is optional)
+    "set_theme", "theme", "colormap", "listed", "cycle",
+    "style_dict", "save_style", "swatch_figure", "PAPER_RC", "resolve_font",
+    # derived palette library
+    "derived", "all_palettes", "derived_names", "search", "recommend",
+    "family", "families", "bases", "stats", "best_for", "random_palette",
+    "quality", "get", "info", "lookup",
+    # application profiles: basic / clinical / database research
+    "applications", "profiles", "suggest_for", "application",
+}
+
 _MPL_NAMES = {"set_theme", "theme", "colormap", "listed", "cycle",
-              "style_dict", "save_style", "swatch_figure", "PAPER_RC"}
+              "style_dict", "save_style", "swatch_figure", "PAPER_RC",
+              "resolve_font"}
 
-__all__ = [n for n in dir() if not n.startswith("_")] + sorted(_MPL_NAMES)
+__all__ = [n for n in dir() if not n.startswith("_")] + sorted(_LAZY_NAMES)
 
 
 def __getattr__(name):  # PEP 562
+    # importlib is used rather than `from . import x`: the latter re-enters this
+    # hook while the submodule is still being bound, and recurses forever.
+    import importlib
     if name in _MPL_NAMES:
-        from . import mpl
-        return getattr(mpl, name)
+        return getattr(importlib.import_module(f"{__name__}.mpl"), name)
+    if name in _LAZY_NAMES:
+        return getattr(importlib.import_module(f"{__name__}.derived"), name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def __dir__():
-    return sorted(set(globals()) | _MPL_NAMES)
+    return sorted(set(globals()) | _LAZY_NAMES)
