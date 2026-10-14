@@ -32,8 +32,13 @@ def test_roles_match_colour_count():
         assert len(PALETTES[pid]["roles"]) == len(PALETTES[pid]["hex"]), pid
 
 
-def test_published_hex_values_are_stable():
-    """Guard against accidental edits to the transcribed data."""
+def test_transcribed_hex_values_are_stable():
+    """Guard against accidental edits to the transcribed data.
+
+    These six are transcribed from the reference figures rather than being
+    original colour values: they anchor the generated variants. The pixel
+    readings behind them are recorded in references/raw-rgb-measurements.md.
+    """
     expected = {
         "glacier": ["#315C6B", "#538A95", "#8CB9BB", "#C9DEDA",
                     "#607D8B", "#A5BCC7", "#C6B992", "#E5DDC8"],
@@ -469,7 +474,7 @@ def test_family_and_index():
         assert ids, fam
         for pid in ids:
             assert sp.get(pid)["family"] == fam
-    # a published palette id works as a "family" too
+    # a anchor palette id works as a "family" too
     assert len(sp.family("glacier")) > 1
     assert all(sp.get(p)["base"] == "glacier" for p in sp.family("glacier"))
 
@@ -501,11 +506,31 @@ def test_search_returns_positions_within_range():
 
 def test_stats_adds_up():
     s = sp.stats()
-    assert s["published"] == len(sp.names())
-    assert s["derived"] == len(sp.derived_names())
-    assert s["total"] == s["published"] + s["derived"]
-    assert sum(s["families"].values()) == s["derived"]
+    assert s["anchors"] == len(sp.names())
+    assert s["variants"] == len(sp.derived_names())
+    assert s["total"] == s["anchors"] + s["variants"]
+    assert sum(s["families"].values()) == s["variants"]
     assert set(s["families"]) == set(sp.families())
+    # the v2 keys stay as aliases so older code keeps working
+    assert s["anchor"] == s["anchors"]
+    assert s["derived"] == s["variants"]
+
+
+def test_anchors_and_variants_partition_the_library():
+    """Every palette is either an anchor or a variant, with no overlap."""
+    a = sp.anchors()
+    v = sp.variants()
+    assert len(a) == 6
+    assert len(v) == len(sp.derived_names())
+    assert not (set(a) & set(v))
+    assert set(a) | set(v) == set(sp.all_palettes())
+    for info in a.values():
+        assert len(info["hex"]) == 8
+        assert info["name_zh"] and info["name_en"]
+    for info in v.values():
+        assert len(info["hex"]) in (7, 8)
+        assert info["base"]          # variants know their parent anchor
+        assert info["family"]
 
 
 def test_random_palette_is_reproducible():

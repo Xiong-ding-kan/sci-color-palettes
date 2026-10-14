@@ -1,6 +1,6 @@
 # Palette reference
 
-Copy-paste hex values. Order is dark -> light as published, so index 0 is
+Copy-paste hex values. Order is dark -> light as anchor, so index 0 is
 always the emphasis colour. `contrast` is the WCAG ratio against white;
 below 3:1 the colour is for fills and bands, not for text or thin lines.
 

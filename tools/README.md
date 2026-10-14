@@ -23,7 +23,7 @@ python tools/gen_derived_palettes.py     # 1. rebuild derived.json
 python tools/measure_distribution.py     # 2. check the thresholds still fit
 python tools/gen_applications.py         # 3. rebuild applications.json
 python tools/gen_derived_docs.py         # 4. rebuild the palette reference
-python tools/gen_palette_reference.py    #    (published palettes, unchanged)
+python tools/gen_palette_reference.py    #    (anchor palettes, unchanged)
 python tools/gen_swatch_strips.py        #    README swatch images
 python -m sci_palettes sheet gallery/palette_sheet.png   # README hero image
 python tests/test_palettes.py            # 5. verify

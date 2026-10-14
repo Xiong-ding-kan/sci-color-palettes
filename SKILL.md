@@ -1,14 +1,22 @@
 ---
 name: sci-color-palettes
-description: A library of 184 publication-ready colour schemes for SCI journal figures - 6 published palettes from the "科研配色" series plus 178 generated variants - scored and filtered for basic research, clinical research (survival curves, forest plots) and database/registry work. Use when choosing colours for matplotlib/seaborn/Origin/R/GraphPad figures, when a user asks for 科研配色 / SCI 配色 / 论文配色 / 临床配色, when a figure needs many categories, or when checking a colour choice for colour-blind safety and print contrast.
+description: A library of 184 publication-ready colour schemes for SCI journal figures - 6 anchor palettes from the "科研配色" series plus 178 generated variants - scored and filtered for basic research, clinical research (survival curves, forest plots) and database/registry work. Use when choosing colours for matplotlib/seaborn/Origin/R/GraphPad figures, when a user asks for 科研配色 / SCI 配色 / 论文配色 / 临床配色, when a figure needs many categories, or when checking a colour choice for colour-blind safety and print contrast.
 ---
 
 # SCI colour palettes (科研配色)
 
-184 eight-colour schemes, every one audited. Six are published designs; the
-other 178 are generated from them by hue rotation, temperature drift, chroma and
-contrast changes, monochrome collapse and cross-palette blending. All are
+184 eight-colour schemes, every one audited. Six are anchor palettes whose hex
+values were transcribed from the reference figures; the other 178 are generated
+from them by hue rotation, temperature drift, chroma and contrast changes,
+monochrome collapse, diverging scales and cross-palette blending. All are
 scored, and each is ranked for the research fields below.
+
+In this repository **"original" means the colours in the reference figures**.
+The anchor palettes are transcribed *from* those figures, so they are derived
+values too - as is everything else here. Where the printed label and the swatch
+pixels differ, the label is shipped (explicit, reproducible, free of sampling
+choices) and the pixel readings are recorded in
+`references/raw-rgb-measurements.md`.
 
 ## Start here: pick the field, then the palette
 
@@ -75,7 +83,7 @@ sp.sub("sage", 4)                       # 4 consecutive ramp members
 |---|---|---|
 | `hue_rotate` | 76 | the same scheme at another hue angle (30 deg steps, 15 deg for glacier/sage) |
 | `temperature` | 24 | warm / cool drift, for a warmer or cooler mood |
-| `blend` | 12 | two published palettes mixed (e.g. `glacier+dusk_rose`) |
+| `blend` | 12 | two anchor palettes mixed (e.g. `glacier+dusk_rose`) |
 | `clinical` | 12 | widest practical lightness span; survival and forest panels |
 | `contrast` | 12 | a lifted (`-light`) or deepened (`-dark`) ramp |
 | `diverging` | 12 | symmetric scales for reference ranges (`div-wine-teal`, ...) |
@@ -88,7 +96,7 @@ sp.sub("sage", 4)                       # 4 consecutive ramp members
 ```python
 sp.derived_names()                 # all 178 generated ids
 sp.family("clinical")              # ids in one family, best score first
-sp.family("glacier")               # every variant of one published palette
+sp.family("glacier")               # every variant of one anchor palette
 sp.search("#315C6B")               # palettes containing a colour you must use
 sp.recommend(n=10, min_score=70)   # highest scoring overall
 sp.stats()                         # counts per family and per field
@@ -116,16 +124,18 @@ clinical panels, `sage-mono` is a single-hue sage ramp.
 
 ## Files
 
-- `scripts/sci_palettes/` - the package. `data.py` holds the six published hex
+- `scripts/sci_palettes/` - the package. `data.py` holds the six anchor hex
   values, `derived.json` the 178 generated ones, `applications.json` the field
   scores, `core.py` colour maths, `mpl.py` matplotlib, `exporters.py` formats.
-- `references/palettes.md` - copy-paste hex tables for the six published palettes.
+- `references/palettes.md` - copy-paste hex tables for the six anchor palettes.
+- `references/raw-rgb-measurements.md` - the raw RGB read off the reference
+  swatches, next to the printed labels, with the measurement method.
 - `references/applications.md` - the field profiles, criteria and top picks.
 - `references/derived-palettes.md` - every generated palette grouped by family.
 - `references/accessibility.md` - how to read the audit, and what to do.
 - `references/matplotlib.md` - full API and rcParam reference.
 - `references/sources.md` - the six source articles.
-- `examples/` - five runnable figure scripts; `gallery/` - their output.
+- `examples/` - six runnable figure scripts; `gallery/` - their output.
 - `tools/` - regenerates `derived.json`, `applications.json` and the docs.
 
 ## Install

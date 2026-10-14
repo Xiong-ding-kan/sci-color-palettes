@@ -20,7 +20,7 @@ def code(s):
 
 out = []
 out.append("# Palette reference\n")
-out.append("Copy-paste hex values. Order is dark -> light as published, so index 0 is")
+out.append("Copy-paste hex values. Order is dark -> light as anchor, so index 0 is")
 out.append("always the emphasis colour. `contrast` is the WCAG ratio against white;")
 out.append("below 3:1 the colour is for fills and bands, not for text or thin lines.\n")
 out.append("Chinese names, English names and the ids below all work as arguments to")

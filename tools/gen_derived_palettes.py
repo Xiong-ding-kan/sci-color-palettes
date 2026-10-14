@@ -53,7 +53,7 @@ def audit(cols: list[str], family: str = "") -> dict:
                                   for i, a in enumerate(sim) for b in sim[i + 1:]), 1)
     on_white = sum(1 for c in cols if sp.contrast_ratio(c, "#FFFFFF") >= 4.5)
     # A diverging scale is read as two arms meeting at the centre, so what has
-    # to hold is that each arm moves monotonically inward. The published ramps
+    # to hold is that each arm moves monotonically inward. The anchor ramps
     # are explicitly *not* globally monotone - they walk through hue families
     # (glacier goes teal, then slate, then sand) - so requiring it globally
     # would reject the six reference palettes themselves.
@@ -316,7 +316,7 @@ for b in BASIC_SOURCES:
         "greyscale and in photocopied supplementary material")
 
 # clinical reference-range ramps: diverging scales centred on a normal range,
-# a zero effect size or a change from baseline. Arms are drawn from published
+# a zero effect size or a change from baseline. Arms are drawn from anchor
 # palette colours so no invented near-black endpoints can collide.
 DIVERGING = [
     ("wine-teal", "burgundy", "glacier"),

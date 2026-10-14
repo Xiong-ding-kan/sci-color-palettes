@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
-"""Canonical palette data for the sci-color-palettes skill.
+"""The six anchor palettes for the sci-color-palettes skill.
 
-Every palette is an ordered 8-colour ramp transcribed from the
-"科研配色" (Scientific Colour Schemes) series on WeChat Official Accounts.
-Each ramp is ordered light -> dark by relative luminance and is designed so
-that subsets of consecutive colours stay harmonious.
+Each is an ordered 8-colour ramp whose hex values were transcribed from the
+palette figures in the "科研配色" (Scientific Colour Schemes) series on WeChat
+Official Accounts. They are called *anchors*, not originals: the reference
+figures hold the original colours, and these values - like every other palette
+in this library - are derived from them. In this repository "original" always
+means the colours in the source images.
+
+``references/raw-rgb-measurements.md`` records the raw RGB read off those
+figures, next to the hex labels printed on the swatches, so the choice of values
+is auditable. Each ramp is ordered light -> dark by relative luminance and is
+designed so that subsets of consecutive colours stay harmonious.
 
 Colour names are descriptive; only ``hex`` is authoritative.
 """

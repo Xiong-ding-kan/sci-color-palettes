@@ -52,7 +52,7 @@ def names() -> list[str]:
 def resolve(name: str) -> str:
     """Map any alias (Chinese name, English name, shorthand, derived id) to an id.
 
-    Published palettes are checked first; the generated variants are consulted
+    Anchor palettes are checked first; the generated variants are consulted
     only if nothing matches, so this stays fast for the common case.
     """
     if not isinstance(name, str):
@@ -75,7 +75,7 @@ def resolve(name: str) -> str:
     except (ImportError, FileNotFoundError, KeyError):
         pass
     raise KeyError(
-        f"unknown palette {name!r}; {len(PALETTES)} published palettes: "
+        f"unknown palette {name!r}; {len(PALETTES)} anchor palettes: "
         f"{', '.join(PALETTE_ORDER)} "
         f"(aliases include the Chinese names, e.g. '冰川蓝绿'); "
         f"plus generated variants such as 'glacier-h030' or 'glacier-warm' "
@@ -84,14 +84,14 @@ def resolve(name: str) -> str:
 
 
 def info(name: str) -> dict:
-    """Metadata for any palette, published or generated."""
+    """Metadata for any palette, anchor or generated."""
     from . import derived
     return derived.get(name)
 
 
 def lookup(name: str) -> dict:
     """Registry record for any palette: the one accessor the rest of the
-    package uses, so published and generated palettes behave identically."""
+    package uses, so anchor and generated palettes behave identically."""
     pid = resolve(name)
     if pid in PALETTES:
         return PALETTES[pid]

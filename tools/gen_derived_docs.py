@@ -51,13 +51,13 @@ FAMILY_INTRO = {
              "in greyscale and in photocopied supplementary material.",
     "diverging": "Symmetric scales with a pale centre at index 3: reference ranges, "
                  "log fold change, change from baseline.",
-    "contrast": "The published ramp lifted into a paler range or deepened into a "
+    "contrast": "The anchor ramp lifted into a paler range or deepened into a "
                 "higher-contrast one.",
     "chroma": "Saturation changed: muted, softened or intensified.",
     "complement": "Every hue moved to its opposite. Loud by design; poster and "
                   "graphical-abstract territory.",
     "monochrome": "One hue family, lightness only. The safest option for print.",
-    "blend": "Two published palettes mixed in LCh: the lightness ramp of the first, "
+    "blend": "Two anchor palettes mixed in LCh: the lightness ramp of the first, "
              "the colour character of the second.",
     "temperature": "The ramp pulled toward orange or cyan, tapered by chroma so "
                    "near-neutral members stay neutral.",
@@ -68,7 +68,7 @@ FAMILY_INTRO = {
 
 out = []
 out.append("# Generated palette library\n")
-out.append(f"{len(records)} variants of the six published palettes, "
+out.append(f"{len(records)} variants of the six anchor palettes, "
            f"{len(PALETTES) + len(records)} schemes in total. Each id encodes its "
            "transform, so it is reproducible and readable: "
            f"{code('glacier-h030')} is glacier rotated 30 deg, "

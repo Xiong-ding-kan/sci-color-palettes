@@ -1,6 +1,6 @@
 # sci-color-palettes · 科研配色
 
-> **184 publication-ready colour schemes** for SCI figures — 6 published designs
+> **184 publication-ready colour schemes** for SCI figures — 6 transcribed designs
 > plus 178 generated variants — each audited for colour-blind safety and print
 > contrast, and ranked for **basic research**, **clinical research** and
 > **database / registry** work.
@@ -9,13 +9,21 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Palettes](https://img.shields.io/badge/palettes-184-6F8F7B.svg)](#the-library)
 
-The six published palettes come from the **科研配色** (Scientific Colour
-Schemes) series, where each article prints one 8-colour scheme as an image.
+The six anchor palettes come from the **科研配色** (Scientific Colour
+Schemes) series, where each article shows one 8-colour scheme as a figure.
 This repository turns them into hex data a script can use, then derives 178
 variants by hue rotation, temperature drift, chroma and contrast changes,
 monochrome collapse and cross-palette blending — audited and scored.
 
-![All six published palettes](gallery/palette_sheet.png)
+The figures are renders, so there is no earlier non-image source of these
+colours. The six anchor values are the hex labels printed on the swatches;
+[references/raw-rgb-measurements.md](references/raw-rgb-measurements.md) also
+records the raw RGB read straight off those swatches, next to the labels, so the
+choice is auditable. In this repository **"original" means the colours in the
+reference figures** — the anchor palettes and their 178 variants are all derived
+from them.
+
+![All six anchor palettes](gallery/palette_sheet.png)
 
 ## Pick by field first
 
@@ -48,7 +56,7 @@ print(sp.applications("burgundy-clin-hi")["scores"])
 # {'clinical': 80, 'database': 68, 'basic': 92, 'general': 92}
 ```
 
-## The six published palettes
+## The six anchor palettes
 
 | Palette | 中文名 | English | Designed for |
 |---|---|---|---|
@@ -67,7 +75,7 @@ Hex values, roles and per-palette audits: **[references/palettes.md](references/
 |---|---|---|
 | `hue_rotate` | 76 | the same scheme at another hue angle (30° steps; 15° for glacier/sage) |
 | `temperature` | 24 | warm / cool drift |
-| `blend` | 12 | two published palettes mixed (e.g. `glacier+dusk_rose`) |
+| `blend` | 12 | two anchor palettes mixed (e.g. `glacier+dusk_rose`) |
 | `clinical` | 12 | widest practical lightness span; survival and forest panels |
 | `contrast` | 12 | a lifted (`-light`) or deepened (`-dark`) ramp |
 | `diverging` | 12 | symmetric scales for reference ranges (`div-wine-teal`, …) |
@@ -84,7 +92,7 @@ clinical panels, `sage-mono` is a single-hue sage ramp.
 ```python
 sp.derived_names()                 # all 178 generated ids
 sp.family("clinical")              # one family, best score first
-sp.family("glacier")               # every variant of one published palette
+sp.family("glacier")               # every variant of one anchor palette
 sp.search("#315C6B")               # palettes containing a colour you must use
 sp.recommend(n=10, min_score=70)
 sp.stats()                         # counts per family and per field
@@ -166,7 +174,7 @@ from the reference tables.
 ### Command line
 
 ```bash
-python -m sci_palettes list                  # the six published palettes
+python -m sci_palettes list                  # the six anchor palettes
 python -m sci_palettes show 冰川蓝绿
 python -m sci_palettes check                 # audit all six
 python -m sci_palettes export indigo out.css
@@ -181,7 +189,7 @@ python -m sci_palettes sheet gallery/sheet.png
 | [diverging_preview.png](gallery/diverging_preview.png) | the four diverging archetypes at three arm depths |
 | [clinical_figures.png](gallery/clinical_figures.png) | Kaplan-Meier, forest plot, adverse events, cohorts, missing data |
 | [showcase_glacier_teal.png](gallery/showcase_glacier_teal.png) | nine panel types in one figure |
-| [colormap_gallery.png](gallery/colormap_gallery.png) | all six published ramps as continuous / discrete / contour |
+| [colormap_gallery.png](gallery/colormap_gallery.png) | all six anchor ramps as continuous / discrete / contour |
 | [materials_burgundy.png](gallery/materials_burgundy.png) | XRD, adsorption, pore, TGA, mechanics, property map |
 | [group_comparison_indigo.png](gallery/group_comparison_indigo.png) | group encoding + deuteranopia preview |
 
@@ -195,7 +203,7 @@ python examples/01_showcase_grid.py burgundy     # any palette id
 ```
 SKILL.md                  agent-skill instructions (workflow + rules)
 scripts/sci_palettes/     the importable package
-  data.py                 the six published palettes: hex, roles, aliases
+  data.py                 the six anchor palettes: hex, roles, aliases
   derived.json            178 generated palettes with audits and scores
   applications.json       per-field scores, gates and metrics
   derived.py              library access, field suggestions, colour search
@@ -204,8 +212,8 @@ scripts/sci_palettes/     the importable package
   exporters.py            JSON / CSS / SCSS / ASE / GPL / JASC
   cli.py                  python -m sci_palettes
 examples/                 six runnable figure scripts
-references/               palettes, derived-palettes, applications, accessibility,
-                          matplotlib, sources
+references/               palettes, raw-rgb-measurements, derived-palettes,
+                          applications, accessibility, matplotlib, sources
 tools/                    regenerates the JSON data and the reference docs
 tests/                    60 tests over data, maths, selection, fields, exports
 gallery/                  rendered output
@@ -219,7 +227,7 @@ gallery/                  rendered output
   reproducible and can be recomputed from hex values alone.
 - **Separation is measured on the best 5-colour subset as well as all 8**,
   because figures rarely use all eight members of a ramp.
-- **Ramps are ordered dark → light** as published, so index 0 is the emphasis
+- **Ramps are ordered dark → light** as transcribed, so index 0 is the emphasis
   colour and the last index the neutral — a greyscale print keeps the structure
   even when hue collapses.
 - **`select` uses an exact dynamic program** to pick *n* of 8 colours closest to
@@ -255,7 +263,7 @@ the data, so the documentation cannot drift from the code.
 
 ## Sources and credit
 
-The six published palettes come from the articles listed in
+The six anchor palettes come from the articles listed in
 [references/sources.md](references/sources.md); the colour choices are the
 original authors' work. This repository adds the machine-readable data,
 the derived library, the field scoring, tooling and documentation.

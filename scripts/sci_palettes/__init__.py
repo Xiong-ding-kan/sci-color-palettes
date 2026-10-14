@@ -35,7 +35,7 @@ _LAZY_NAMES = {
     # derived palette library
     "derived", "all_palettes", "derived_names", "search", "recommend",
     "family", "families", "bases", "stats", "best_for", "random_palette",
-    "quality", "get", "info", "lookup",
+    "quality", "get", "info", "lookup", "anchors", "variants",
     # application profiles: basic / clinical / database research
     "applications", "profiles", "suggest_for", "application",
 }

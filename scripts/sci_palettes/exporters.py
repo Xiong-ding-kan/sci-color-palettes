@@ -22,7 +22,7 @@ _BLOCK = "\u2588\u2588\u2588"
 def resolve_names(names=None) -> list[str]:
     """Normalise an export target list.
 
-    ``None`` (default) means the six published palettes, so exports stay small;
+    ``None`` (default) means the six anchor palettes, so exports stay small;
     pass ``"all"`` or ``"derived"`` to include the generated variants.
     """
     if names is None:

@@ -22,7 +22,7 @@ neighbours in the ramp, e.g. `#315C6B` and `#C6B992` instead of `#315C6B` and
 
 ## 2. Colour-vision deficiency
 
-The palette is transformed with published protanopia / deuteranopia /
+The palette is transformed with anchor protanopia / deuteranopia /
 tritanopia / achromatopsia matrices and the worst remaining pair is reported.
 
 All six palettes are built on lightness steps, so **the darkness ordering

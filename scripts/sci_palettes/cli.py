@@ -3,8 +3,8 @@
 
 Commands
 --------
-list                          the six published palettes with swatches
-show <palette>                detail any palette (published or generated)
+list                          the six anchor palettes with swatches
+show <palette>                detail any palette (anchor or generated)
 check [palette ...]           colour-vision / contrast audit
 export <palette> <file>       write .json .css .scss .ase .gpl .jasc
 sheet <file.png>              render a swatch sheet for the README
@@ -130,15 +130,15 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="sci_palettes",
         description="科研配色 / scientific colour schemes "
-                    "(6 published palettes + 178 generated variants)")
+                    "(6 anchor palettes + 178 generated variants)")
     sub = p.add_subparsers(dest="command")
 
-    s = sub.add_parser("list", help="show the published palettes with swatches")
+    s = sub.add_parser("list", help="show the anchor palettes with swatches")
     s.add_argument("palettes", nargs="*")
     s.add_argument("--per-line", type=int, default=8)
     s.set_defaults(func=_cmd_list)
 
-    s = sub.add_parser("show", help="detail one palette, published or generated")
+    s = sub.add_parser("show", help="detail one palette, anchor or generated")
     s.add_argument("palette")
     s.set_defaults(func=_cmd_show)
 

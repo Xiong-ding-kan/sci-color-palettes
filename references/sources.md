@@ -1,11 +1,11 @@
 # Where the six palettes come from
 
 The palettes were transcribed from the "科研配色" (Scientific Colour Schemes)
-series published on WeChat Official Accounts. Each article presents one 8-colour
+series anchor on WeChat Official Accounts. Each article presents one 8-colour
 scheme with printed hex codes, followed by nine demonstration panels.
 
 Every hex value in `scripts/sci_palettes/data.py` was taken from the printed
-swatch labels in these articles and cross-checked by re-sampling the published
+swatch labels in these articles and cross-checked by re-sampling the anchor
 swatch pixels. The re-sampled values agree with the labels to within the
 anti-aliasing of the source render, so the printed labels are used verbatim.
 
@@ -20,11 +20,13 @@ anti-aliasing of the source render, so the printed labels are used verbatim.
 
 ## What this repository adds
 
-The articles publish colour values as images. This repository turns them into
-something a script can use:
+The articles present colour values as rendered figures. This repository turns
+them into something a script can use:
 
 - machine-readable hex data with per-colour roles (`data.py`, `palettes.json`);
-- palette-aware selection that preserves the published hue families
+- the raw RGB read off the reference swatches, next to the printed labels
+  (`raw-rgb-measurements.md`), with the sampling method and its limits;
+- palette-aware selection that preserves the transcribed hue families
   (`select`) versus Lab-space blending for continuous scales (`ramp`);
 - colour-vision-deficiency simulation and WCAG contrast auditing;
 - ready-made matplotlib themes, colormaps and paper styling;
@@ -32,6 +34,15 @@ something a script can use:
 
 Original colour choices remain the work of the source series; this project
 claims no authorship over the palettes themselves.
+
+## A note on what "original" means here
+
+These are rendered figures, so there is no earlier non-image source for the
+colours. The original colours are the ones in the figures. The six anchor
+palettes are transcribed *from* those figures - by reading the hex printed on
+each swatch - and are therefore derived values as well; the 178 variants are
+derived from the anchors in turn. `raw-rgb-measurements.md` records what the
+swatch pixels actually contain, so both readings are on the record.
 
 ## Reproducing the transcription
 

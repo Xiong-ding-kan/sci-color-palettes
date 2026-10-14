@@ -1,6 +1,6 @@
 # Generated palette library
 
-178 variants of the six published palettes, 184 schemes in total. Each id encodes its transform, so it is reproducible and readable: `glacier-h030` is glacier rotated 30 deg, `burgundy-clin` is burgundy tuned for clinical panels, `sage-mono` is a single-hue sage ramp.
+178 variants of the six anchor palettes, 184 schemes in total. Each id encodes its transform, so it is reproducible and readable: `glacier-h030` is glacier rotated 30 deg, `burgundy-clin` is burgundy tuned for clinical panels, `sage-mono` is a single-hue sage ramp.
 
 Field suitability (C = clinical, D = database, B = basic) is in the last column; see [applications.md](applications.md) for the criteria. Each score is out of 100.
 
@@ -122,7 +122,7 @@ Symmetric scales with a pale centre at index 3: reference ranges, log fold chang
 
 ## contrast (12)
 
-The published ramp lifted into a paler range or deepened into a higher-contrast one.
+The anchor ramp lifted into a paler range or deepened into a higher-contrast one.
 
 | id | 中文 | hex | score | C / D / B |
 |---|---|---|---|---|
@@ -193,7 +193,7 @@ One hue family, lightness only. The safest option for print.
 
 ## blend (12)
 
-Two published palettes mixed in LCh: the lightness ramp of the first, the colour character of the second.
+Two anchor palettes mixed in LCh: the lightness ramp of the first, the colour character of the second.
 
 | id | 中文 | hex | score | C / D / B |
 |---|---|---|---|---|

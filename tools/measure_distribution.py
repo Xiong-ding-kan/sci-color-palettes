@@ -39,7 +39,7 @@ def main() -> int:
     metrics = ("min8", "min5", "cvd5", "cvd8", "span8", "dark", "hue_spread")
 
     print(f"n = {len(rows)} palettes "
-          f"({len(PALETTES)} published + {len(sp.derived_names())} generated)\n")
+          f"({len(PALETTES)} anchor + {len(sp.derived_names())} generated)\n")
     header = (f"{'metric':<11} {'min':>7} {'p10':>7} {'p25':>7} "
               f"{'median':>7} {'p75':>7} {'p90':>7} {'max':>7}")
     print(header)
@@ -51,7 +51,7 @@ def main() -> int:
     print("\nper family (median, max):")
     fams: dict[str, list[dict]] = {}
     for pid, m in rows.items():
-        fams.setdefault(sp.get(pid).get("family", "published"), []).append(m)
+        fams.setdefault(sp.get(pid).get("family", "anchor"), []).append(m)
     for fam, ms in sorted(fams.items(),
                           key=lambda kv: -statistics.median(x["min5"] for x in kv[1])):
         print(f"  {fam:<12} n={len(ms):>3}  "
