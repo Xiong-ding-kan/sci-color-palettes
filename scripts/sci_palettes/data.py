@@ -1,0 +1,144 @@
+# -*- coding: utf-8 -*-
+"""Canonical palette data for the sci-color-palettes skill.
+
+Every palette is an ordered 8-colour ramp transcribed from the
+"科研配色" (Scientific Colour Schemes) series on WeChat Official Accounts.
+Each ramp is ordered light -> dark by relative luminance and is designed so
+that subsets of consecutive colours stay harmonious.
+
+Colour names are descriptive; only ``hex`` is authoritative.
+"""
+
+from __future__ import annotations
+
+# --------------------------------------------------------------------------
+# Raw palette definitions
+# --------------------------------------------------------------------------
+
+PALETTES: dict[str, dict] = {
+    "glacier": {
+        "name_zh": "冰川蓝绿",
+        "name_en": "Glacier Teal",
+        "subtitle_zh": "清透冷调 / 环境与生态",
+        "subtitle_en": "Clear cool tones / Environment & ecology",
+        "vibe": "cool, clean, aquatic; teal-driven with a sand accent",
+        "roles": [
+            "primary dark", "primary", "primary mid", "primary pale",
+            "secondary dark", "secondary", "accent warm", "accent warm pale",
+        ],
+        "hex": ["#315C6B", "#538A95", "#8CB9BB", "#C9DEDA",
+                "#607D8B", "#A5BCC7", "#C6B992", "#E5DDC8"],
+    },
+    "dusk_rose": {
+        "name_zh": "暮紫玫瑰",
+        "name_en": "Dusk Purple Rose",
+        "subtitle_zh": "温柔层次 / 生物与数据",
+        "subtitle_en": "Gentle layering / Biology & data",
+        "vibe": "soft, feminine, layered; two purple steps then rose then sage",
+        "roles": [
+            "primary dark", "primary", "primary pale", "primary mist",
+            "accent rose dark", "accent rose", "accent rose pale", "contrast sage",
+        ],
+        "hex": ["#655675", "#9382A3", "#C0B3CD", "#E4DCEB",
+                "#A96F80", "#CF9CAA", "#E8C9CE", "#A7B6A1"],
+    },
+    "sage": {
+        "name_zh": "鼠尾草紫",
+        "name_en": "Sage & Violet",
+        "subtitle_zh": "柔和层次 / 数据可视化",
+        "subtitle_en": "Soft hierarchy / Data visualisation",
+        "vibe": "restful green -> violet -> sand; the most colour-blind safe of the set",
+        "roles": [
+            "primary sage dark", "primary sage", "primary sage pale",
+            "secondary violet dark", "secondary violet", "secondary violet pale",
+            "accent sand", "accent sand pale",
+        ],
+        "hex": ["#6F8F7B", "#A7BCA3", "#D9E3D2",
+                "#817799", "#B5A8C6", "#DED6E7",
+                "#D4B77A", "#E9DCC3"],
+    },
+    "burgundy": {
+        "name_zh": "勃艮第灰",
+        "name_en": "Burgundy Slate",
+        "subtitle_zh": "克制质感 / 材料与表征",
+        "subtitle_en": "Restrained texture / Materials & characterisation",
+        "vibe": "serious, journal-style; wine reds against slate blue with a gold accent",
+        "roles": [
+            "primary wine dark", "primary wine", "primary wine pale", "primary wine mist",
+            "secondary slate dark", "secondary slate", "secondary slate pale",
+            "accent gold",
+        ],
+        "hex": ["#713E50", "#A56778", "#C997A3", "#E9D5DB",
+                "#526879", "#8FA4B3", "#C4CFD6", "#D5B78C"],
+    },
+    "indigo": {
+        "name_zh": "靛蓝丁香",
+        "name_en": "Indigo Lilac",
+        "subtitle_zh": "理性柔和 / 统计与建模",
+        "subtitle_en": "Rational & soft / Statistics & modelling",
+        "vibe": "cool indigo -> lilac -> muted gold; high legibility for dense plots",
+        "roles": [
+            "primary indigo dark", "primary indigo", "primary indigo pale",
+            "primary indigo mist", "secondary lilac dark", "secondary lilac",
+            "secondary lilac pale", "accent gold",
+        ],
+        "hex": ["#414A78", "#6978A6", "#A5B4D1", "#DCE3F0",
+                "#8B739F", "#B7A1C8", "#DDD0E6", "#C7B38A"],
+    },
+    "lilac_garden": {
+        "name_zh": "熏紫春庭",
+        "name_en": "Smoked Lilac Garden",
+        "subtitle_zh": "柔和雅致 / 材料与催化",
+        "subtitle_en": "Elegant pastels / Materials & catalysis",
+        "vibe": "pastel, airy, multi-hue; balances purple with green, blue and pink",
+        "roles": [
+            "primary lilac", "primary lilac pale", "accent gold", "contrast green",
+            "contrast blue", "contrast pink", "neutral slate", "paper",
+        ],
+        "hex": ["#947CC4", "#DFD0ED", "#DBC496", "#A4C8AA",
+                "#A4CDDF", "#EEB8C6", "#8992A0", "#F5F3F8"],
+    },
+}
+
+# --------------------------------------------------------------------------
+# Aliases: Chinese names, English names, and short handles
+# --------------------------------------------------------------------------
+
+ALIASES: dict[str, str] = {}
+for _key, _p in PALETTES.items():
+    ALIASES[_key.lower()] = _key
+    ALIASES[_p["name_zh"]] = _key
+    ALIASES[_p["name_en"].lower()] = _key
+    for _tok in _p["name_en"].lower().split():
+        ALIASES.setdefault(_tok, _key)
+
+# extra hand-written aliases people actually type
+ALIASES.update({
+    "teal": "glacier",
+    "ice": "glacier",
+    "ocean": "glacier",
+    "glacier-teal": "glacier",
+    "冰川": "glacier",
+    "蓝绿": "glacier",
+    "rose": "dusk_rose",
+    "dusk": "dusk_rose",
+    "暮紫": "dusk_rose",
+    "玫瑰": "dusk_rose",
+    "sage-violet": "sage",
+    "鼠尾草": "sage",
+    "wine": "burgundy",
+    "slate": "burgundy",
+    "burgundy-slate": "burgundy",
+    "勃艮第": "burgundy",
+    "indigo-lilac": "indigo",
+    "靛蓝": "indigo",
+    "丁香": "indigo",
+    "lilac": "lilac_garden",
+    "garden": "lilac_garden",
+    "熏紫": "lilac_garden",
+    "春庭": "lilac_garden",
+})
+
+PALETTE_ORDER = ["glacier", "dusk_rose", "sage", "burgundy", "indigo", "lilac_garden"]
+
+__all__ = ["PALETTES", "ALIASES", "PALETTE_ORDER"]

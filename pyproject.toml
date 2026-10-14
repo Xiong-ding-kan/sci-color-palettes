@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sci-palettes"
+version = "1.0.0"
+description = "Six publication-ready scientific colour schemes for SCI figures (matplotlib, seaborn, CSS, Adobe ASE)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Xiong-ding-kan", email = "xjp0429@126.com" }]
+keywords = ["color", "palette", "scientific", "matplotlib", "visualization", "SCI", "配色"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Visualization",
+  "License :: OSI Approved :: MIT License",
+]
+dependencies = []
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.5"]
+dev = ["matplotlib>=3.5", "pytest>=7"]
+
+[project.scripts]
+sci-palettes = "sci_palettes.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Xiong-ding-kan/sci-color-palettes"
+
+[tool.setuptools]
+package-dir = { "" = "scripts" }
+packages = ["sci_palettes"]

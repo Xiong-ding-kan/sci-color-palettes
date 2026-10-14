@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/*
+!build/sci-palettes.json
+dist/
+.eggs/
+.pytest_cache/
+.venv/
+venv/
+
+# examples write their figures into gallery/ and exports into build/;
+# the files that ship with the repo stay tracked (they are committed already)
+gallery/build/
+
+# editors / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store
